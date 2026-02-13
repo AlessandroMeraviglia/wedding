@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============ AUTH & USERS ============
+
+enum UserRole {
+  ADMIN
+  DESIGNER
+  CUSTOMER_CARE
+  CLIENT
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          UserRole  @default(CLIENT)
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+  notes         ClientNote[]
+  communications Communication[]
+
+  @@map("users")
+}
+
+// ============ TEMPLATES ============
+
+enum TemplateMood {
+  ROMANTIC
+  MINIMAL
+  LUXURY
+  BOHO
+  MODERN
+  CLASSIC
+  RUSTIC
+  ELEGANT
+}
+
+enum EventType {
+  CLASSIC_WEDDING
+  CIVIL_CEREMONY
+  ELOPEMENT
+  DESTINATION
+  RELIGIOUS
+  GARDEN
+  BEACH
+}
+
+enum BudgetTier {
+  STARTER
+  STANDARD
+  PREMIUM
+  LUXURY
+}
+
+model Template {
+  id               String        @id @default(uuid())
+  name             String
+  slug             String        @unique
+  description      String
+  longDescription  String?
+  price            Decimal       @db.Decimal(10, 2)
+  mood             TemplateMood
+  eventType        EventType
+  budgetTier       BudgetTier
+  previewUrl       String?
+  demoUrl          String?
+  thumbnailUrl     String?
+  galleryImages    String[]
+  mobilePreviewUrl String?
+  features         String[]
+  isActive         Boolean       @default(true)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  orders           Order[]
+
+  @@map("templates")
+}
+
+// ============ ADD-ONS ============
+
+enum AddonCategory {
+  TECHNICAL
+  CONTENT
+  GRAPHICS
+  MARKETING
+  PREMIUM
+}
+
+model Addon {
+  id            String        @id @default(uuid())
+  name          String
+  slug          String        @unique
+  description   String
+  price         Decimal       @db.Decimal(10, 2)
+  category      AddonCategory
+  icon          String?
+  isPopular     Boolean       @default(false)
+  isRecommended Boolean       @default(false)
+  sortOrder     Int           @default(0)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  orderAddons   OrderAddon[]
+
+  @@map("addons")
+}
+
+// ============ ORDERS ============
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  IN_PROGRESS
+  REVIEW
+  REVISION
+  COMPLETED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id                 String        @id @default(uuid())
+  orderNumber        String        @unique
+  userId             String
+  templateId         String
+  status             OrderStatus   @default(PENDING_PAYMENT)
+  paymentStatus      PaymentStatus @default(PENDING)
+  stripeSessionId    String?
+  stripePaymentId    String?
+  subtotal           Decimal       @db.Decimal(10, 2)
+  discount           Decimal       @db.Decimal(10, 2) @default(0)
+  total              Decimal       @db.Decimal(10, 2)
+  currency           String        @default("EUR")
+  notes              String?
+  deadlineAt         DateTime?
+  assignedDesignerId String?
+  deliveredAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user               User          @relation(fields: [userId], references: [id])
+  template           Template      @relation(fields: [templateId], references: [id])
+  addons             OrderAddon[]
+  formSubmission     FormSubmission?
+  communications     Communication[]
+  timeline           OrderTimeline[]
+
+  @@map("orders")
+}
+
+model OrderAddon {
+  id      String  @id @default(uuid())
+  orderId String
+  addonId String
+  price   Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  addon   Addon   @relation(fields: [addonId], references: [id])
+
+  @@unique([orderId, addonId])
+  @@map("order_addons")
+}
+
+model OrderTimeline {
+  id        String   @id @default(uuid())
+  orderId   String
+  status    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@map("order_timeline")
+}
+
+// ============ POST-PAYMENT FORM ============
+
+model FormSubmission {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  brideName       String?
+  groomName       String?
+  weddingDate     DateTime?
+  location        String?
+  locationAddress String?
+  ceremonyTime    String?
+  receptionTime   String?
+  customTexts     Json?
+  photoUrls       String[]
+  videoUrls       String[]
+  fontChoice      String?
+  primaryColor    String?
+  secondaryColor  String?
+  accentColor     String?
+  playlist        Json?
+  guestListCsv    String?
+  rsvpQuestions   Json?
+  graphicPrefs    Json?
+  freeNotes       String?
+  isComplete      Boolean  @default(false)
+  lastSavedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  order           Order    @relation(fields: [orderId], references: [id])
+
+  @@map("form_submissions")
+}
+
+// ============ CRM ============
+
+model ClientNote {
+  id        String   @id @default(uuid())
+  userId    String
+  authorId  String?
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("client_notes")
+}
+
+model Communication {
+  id        String   @id @default(uuid())
+  orderId   String?
+  userId    String
+  type      String
+  subject   String?
+  content   String
+  direction String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  order     Order?   @relation(fields: [orderId], references: [id])
+
+  @@map("communications")
+}
+
+// ============ ANALYTICS ============
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  event     String
+  data      Json?
+  sessionId String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+  @@map("analytics_events")
+}
