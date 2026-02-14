@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, ShoppingBag, Users, BarChart3,
-  Settings, Heart, ChevronRight
+  Settings, Heart, ChevronRight, Image
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/orders', label: 'Ordini', icon: ShoppingBag },
   { href: '/admin/clients', label: 'Clienti', icon: Users },
+  { href: '/admin/media', label: 'Media Homepage', icon: Image },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/settings', label: 'Impostazioni', icon: Settings },
 ];

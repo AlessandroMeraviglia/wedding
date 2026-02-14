@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Heart, Search, SlidersHorizontal, Eye, ShoppingCart, Play, Check, ArrowRight, Star, TrendingUp, Award } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
+import { ADDONS } from '@/data/addons';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
 import { TemplateMood, EventType, BudgetTier, TemplateFilters } from '@/types';
 import { formatPrice, MOOD_LABELS, EVENT_TYPE_LABELS, BUDGET_LABELS } from '@/lib/utils';
@@ -30,7 +31,7 @@ export default function TemplatesPage() {
   const [filters, setFilters] = useState<TemplateFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [livePreviewSlug, setLivePreviewSlug] = useState<string | null>(null);
-  const { cart, setTemplate } = useCart();
+  const { cart, setTemplate, toggleAddon } = useCart();
 
   const filtered = useMemo(() => {
     let result = TEMPLATES.filter(t => t.isActive);
@@ -72,6 +73,10 @@ export default function TemplatesPage() {
           onClose={() => setLivePreviewSlug(null)}
           templateName={livePreviewTemplate.name}
           htmlContent={TEMPLATE_DEMOS[livePreviewTemplate.slug]}
+          allAddons={ADDONS}
+          selectedAddonIds={cart.selectedAddons.map(a => a.id)}
+          onToggleAddon={toggleAddon}
+          totalPrice={(livePreviewTemplate.price ?? 0) + cart.selectedAddons.reduce((s, a) => s + a.price, 0)}
         />
       )}
 

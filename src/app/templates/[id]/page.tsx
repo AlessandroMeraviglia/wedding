@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles, Eye } from 'lucide-react';
+import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles, Eye, User } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { ADDONS } from '@/data/addons';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
@@ -38,7 +38,6 @@ export default function TemplateDetailPage() {
     return ADDONS.filter(a => a.category === activeAddonCategory);
   }, [activeAddonCategory]);
 
-  // Related templates by same mood or eventType
   const relatedTemplates = useMemo(() => {
     if (!template) return [];
     return TEMPLATES.filter(t =>
@@ -68,7 +67,7 @@ export default function TemplateDetailPage() {
     setTemplate(template);
   };
 
-  const handleProceed = () => {
+  const handleAddToCartAndProceed = () => {
     if (!isSelected) setTemplate(template);
     router.push('/cart');
   };
@@ -79,24 +78,25 @@ export default function TemplateDetailPage() {
 
   const recommendedAddons = ADDONS.filter(a => a.isRecommended);
 
-  // Calculate prices for floating bar
   const templatePrice = template.price;
   const addonsTotal = cart.selectedAddons.reduce((sum, a) => sum + a.price, 0);
   const totalPrice = templatePrice + addonsTotal;
 
-  // Active addon names for live preview
-  const activeAddonNames = cart.selectedAddons.map(a => a.name);
+  const selectedAddonIds = cart.selectedAddons.map(a => a.id);
 
   return (
     <div className="min-h-screen">
-      {/* Live Preview Modal */}
+      {/* Live Preview Modal - with addon overlays */}
       {demoHtml && (
         <LivePreviewModal
           isOpen={showLivePreview}
           onClose={() => setShowLivePreview(false)}
           templateName={template.name}
           htmlContent={demoHtml}
-          activeAddons={activeAddonNames}
+          allAddons={ADDONS}
+          selectedAddonIds={selectedAddonIds}
+          onToggleAddon={toggleAddon}
+          totalPrice={totalPrice}
         />
       )}
 
@@ -151,18 +151,6 @@ export default function TemplateDetailPage() {
                   </div>
                 )}
 
-                {/* LIVE Button Overlay */}
-                {demoHtml && (
-                  <button
-                    onClick={() => setShowLivePreview(true)}
-                    className="absolute bottom-4 right-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-105 z-10"
-                  >
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>LIVE</span>
-                  </button>
-                )}
-
-                {/* Addon indicators on preview */}
                 {cart.selectedAddons.length > 0 && (
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10 max-w-[200px]">
                     {cart.selectedAddons.slice(0, 3).map(addon => (
@@ -201,7 +189,19 @@ export default function TemplateDetailPage() {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">{template.name}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">{template.name}</h1>
+
+            {/* Designer attribution */}
+            {template.designer && (
+              <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span>Creato da <strong className="text-foreground">{template.designer.name}</strong></span>
+                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Designer Verificato</span>
+              </div>
+            )}
+
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
               {template.longDescription || template.description}
             </p>
@@ -224,10 +224,20 @@ export default function TemplateDetailPage() {
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons — Only PERSONALIZZA and AGGIUNGI AL CARRELLO */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={handleSelectTemplate}
+                onClick={() => {
+                  if (!isSelected) setTemplate(template);
+                  setShowLivePreview(true);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-lg bg-accent hover:bg-accent/90 text-white transition-all hover:shadow-lg"
+              >
+                <Sparkles className="w-5 h-5" />
+                Personalizza
+              </button>
+              <button
+                onClick={handleAddToCartAndProceed}
                 className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-lg transition-all ${
                   isSelected
                     ? 'bg-success text-white'
@@ -237,42 +247,30 @@ export default function TemplateDetailPage() {
                 {isSelected ? (
                   <>
                     <Check className="w-5 h-5" />
-                    Selezionato
+                    Nel Carrello
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    Scegli Questo Template
+                    Aggiungi al Carrello
                   </>
                 )}
               </button>
-              <button
-                onClick={handleProceed}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-lg border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all"
-              >
-                Procedi al Carrello
-              </button>
             </div>
 
-            {/* PERSONALIZZA Button */}
-            <a
-              href="#addons"
-              className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-accent/10 text-accent hover:bg-accent/20 transition-all border border-accent/20"
-            >
-              <Sparkles className="w-4 h-4" />
-              PERSONALIZZA con gli Add-on
-            </a>
-
-            {/* LIVE Preview CTA */}
-            {demoHtml && (
-              <button
-                onClick={() => setShowLivePreview(true)}
-                className="mt-3 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-green-50 text-green-700 hover:bg-green-100 transition-all border border-green-200"
-              >
-                <Play className="w-4 h-4 fill-green-700" />
-                Vedi Anteprima LIVE del Template
-              </button>
-            )}
+            {/* Personalization note */}
+            <div className="mt-6 bg-primary/5 border border-primary/10 rounded-xl p-4">
+              <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-primary" />
+                Come funziona la personalizzazione?
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Dopo l&apos;acquisto, verrai guidato step-by-step in una pagina dedicata dove potrai personalizzare
+                <strong> nomi degli sposi, data delle nozze, location, testi, foto, colori </strong>
+                e tutte le informazioni del vostro matrimonio. Il nostro designer
+                {template.designer ? ` ${template.designer.name}` : ''} si occuperà di integrare ogni dettaglio nel template.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -283,7 +281,7 @@ export default function TemplateDetailPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">Personalizza con gli Add-on</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Aggiungi funzionalità extra al tuo sito matrimoniale
+              Aggiungi funzionalità extra al tuo sito. Le sezioni selezionate saranno visibili nell&apos;anteprima LIVE.
             </p>
           </div>
 
@@ -383,7 +381,7 @@ export default function TemplateDetailPage() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-foreground mb-4">Template Correlati</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Stesso stile, stessa emozione. Scopri altri template che potrebbero piacerti.
+                Stesso stile, stessa emozione. Scopri altri design dei nostri professionisti.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -407,7 +405,10 @@ export default function TemplateDetailPage() {
                         <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">{MOOD_LABELS[tpl.mood]}</span>
                         <span className="text-lg font-bold text-primary">{formatPrice(tpl.price)}</span>
                       </div>
-                      <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{tpl.name}</h3>
+                      <h3 className="text-xl font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">{tpl.name}</h3>
+                      {tpl.designer && (
+                        <p className="text-xs text-muted-foreground mb-2">di {tpl.designer.name}</p>
+                      )}
                       <p className="text-sm text-muted-foreground line-clamp-2">{tpl.description}</p>
                     </div>
                   </div>
@@ -418,7 +419,7 @@ export default function TemplateDetailPage() {
         </section>
       )}
 
-      {/* Floating Cart Summary - Fixed price display */}
+      {/* Floating Cart Summary */}
       {(isSelected || cart.selectedAddons.length > 0) && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border shadow-2xl z-40 animate-slide-up">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

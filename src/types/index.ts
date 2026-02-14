@@ -21,6 +21,10 @@ export interface Template {
   mobilePreviewUrl?: string;
   features: string[];
   isActive: boolean;
+  designer?: {
+    name: string;
+    portfolio?: string;
+  };
 }
 
 // ============ ADD-ON TYPES ============

@@ -8,6 +8,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #4a3728; background: #fdf8f4; overflow-x: hidden; }
   .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(135deg, #fdf2f0 0%, #fce8e4 50%, #f9ddd6 100%); position: relative; overflow: hidden; }
   .hero::before { content: ''; position: absolute; top: -50px; right: -50px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(199,134,134,0.12) 0%, transparent 70%); border-radius: 50%; animation: pulse-glow 4s ease-in-out infinite; }
@@ -91,10 +92,10 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
   <nav class="nav">
     <span class="nav-brand">M &amp; G</span>
     <div class="nav-links">
-      <a href="#">La Storia</a>
-      <a href="#">Dettagli</a>
-      <a href="#">Galleria</a>
-      <a href="#">RSVP</a>
+      <a href="#storia">La Storia</a>
+      <a href="#dettagli">Dettagli</a>
+      <a href="#galleria">Galleria</a>
+      <a href="#rsvp">RSVP</a>
     </div>
   </nav>
   <div class="flower">&#127799;</div>
@@ -119,7 +120,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="countdown-item"><span class="number">18</span><span class="label">Secondi</span></div>
     </div>
   </section>
-  <section class="section story">
+  <section class="section story" id="storia">
     <h2>La Nostra Storia</h2>
     <p class="subtitle">come tutto &egrave; iniziato</p>
     <div class="story-timeline">
@@ -132,7 +133,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
   <section class="quote-section">
     <p class="quote">L'amore non ha bisogno di essere perfetto, ha bisogno di essere vero</p>
   </section>
-  <section class="section details">
+  <section class="section details" id="dettagli">
     <h2>I Dettagli</h2>
     <p class="subtitle">tutto quello che serve sapere</p>
     <div class="details-grid">
@@ -141,7 +142,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="detail-card"><div class="icon">&#127870;</div><h3>Dress Code</h3><p>Elegante<br/>Colori pastello</p></div>
     </div>
   </section>
-  <section class="section gallery">
+  <section class="section gallery" id="galleria">
     <h2>I Nostri Momenti</h2>
     <p class="subtitle">galleria fotografica</p>
     <div class="gallery-grid">
@@ -153,7 +154,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="gallery-item">&#128247;</div>
     </div>
   </section>
-  <section class="section rsvp">
+  <section class="section rsvp" id="rsvp">
     <h2>Conferma la Tua Presenza</h2>
     <p class="subtitle">RSVP</p>
     <div class="rsvp-form">
@@ -185,6 +186,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: -apple-system, 'Helvetica Neue', sans-serif; color: #1a1a1a; background: #ffffff; overflow-x: hidden; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -263,7 +265,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     <div class="item"><h3>Ricevimento</h3><p>Villa Necchi<br/>Via Mozart 14, Milano<br/>Ore 18:00</p></div>
   </div>
   <div class="quote-band"><p>"In te ho trovato la mia casa, il mio viaggio, la mia destinazione."</p></div>
-  <section class="rsvp">
+  <section class="rsvp" id="rsvp">
     <h2>RSVP</h2>
     <p>Conferma la tua presenza entro il 20 Agosto 2026</p>
     <div class="rsvp-form"><input placeholder="La tua email" /><button>Conferma</button></div>
@@ -284,6 +286,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #ccc; background: #0a0a0a; overflow-x: hidden; }
   @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -340,7 +343,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <body>
   <nav class="nav">
     <span class="nav-brand">A &amp; F</span>
-    <div class="nav-links"><a href="#">Programma</a><a href="#">Galleria</a><a href="#">RSVP</a></div>
+    <div class="nav-links"><a href="#programma">Programma</a><a href="#galleria">Galleria</a><a href="#rsvp">RSVP</a></div>
   </nav>
   <section class="hero">
     <div>
@@ -361,7 +364,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     </div>
   </section>
   <div class="quote-gold"><p>"Ogni storia d'amore &egrave; bella, ma la nostra &egrave; la mia preferita."</p></div>
-  <section class="section gold-bg">
+  <section class="section gold-bg" id="programma">
     <h2 class="gold-text">Programma</h2>
     <p class="sub">timeline della giornata</p>
     <div class="timeline">
@@ -372,7 +375,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="timeline-item"><span class="time">23:00</span><span class="desc">Festa e balli fino a tarda notte</span></div>
     </div>
   </section>
-  <section class="section dark">
+  <section class="section dark" id="galleria">
     <h2 class="gold-text">Galleria</h2>
     <p class="sub">i nostri momenti dorati</p>
     <div class="gallery-grid">
@@ -382,7 +385,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="item">&#128142;</div><div class="item">&#127775;</div>
     </div>
   </section>
-  <section class="rsvp-section">
+  <section class="rsvp-section" id="rsvp">
     <h2>RSVP</h2>
     <p class="sub">conferma la tua presenza</p>
     <div class="rsvp-form">
@@ -407,6 +410,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #5c4a3a; background: #f7f3ee; overflow-x: hidden; }
   @keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -466,7 +470,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <body>
   <nav class="nav">
     <span class="nav-brand">D &amp; E</span>
-    <div class="nav-links"><a href="#">Info</a><a href="#">Galleria</a><a href="#">Menu</a><a href="#">RSVP</a></div>
+    <div class="nav-links"><a href="#info">Info</a><a href="#galleria">Galleria</a><a href="#menu">Menu</a><a href="#rsvp">RSVP</a></div>
   </nav>
   <div class="leaf">&#127807;</div>
   <div class="leaf">&#127811;</div>
@@ -481,12 +485,12 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <p class="date">8 Maggio 2026 &bull; Toscana</p>
     </div>
   </section>
-  <section class="section story-section">
+  <section class="section story-section" id="storia">
     <h2>La Nostra Storia</h2>
     <p class="sub">un amore nato in campagna</p>
     <p class="story-text">Ci siamo incontrati durante una vendemmia in Chianti. Tra filari di vigne e tramonti toscani, abbiamo scoperto che i nostri cuori battevano allo stesso ritmo. Tre anni dopo, siamo pronti a dire "s&igrave;" nello stesso luogo dove tutto &egrave; iniziato.</p>
   </section>
-  <section class="section">
+  <section class="section" id="info">
     <h2>Cerimonia &amp; Ricevimento</h2>
     <p class="sub">dove trovarci</p>
     <div class="info-cards">
@@ -496,7 +500,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="info-card"><div class="icon">&#127968;</div><h3>Alloggio</h3><p>Camere disponibili<br/>presso l'agriturismo</p></div>
     </div>
   </section>
-  <section class="section menu-section">
+  <section class="section menu-section" id="menu">
     <h2>Il Menu</h2>
     <p class="sub">sapori toscani</p>
     <div class="menu-grid">
@@ -506,7 +510,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     </div>
   </section>
   <div class="quote-boho"><p>"E quando ti ho trovato, ho capito che non stavo cercando una persona, ma una casa."</p></div>
-  <section class="section bg-cream">
+  <section class="section bg-cream" id="galleria">
     <h2>Galleria</h2>
     <p class="sub">la nostra avventura</p>
     <div class="gallery-grid">
@@ -518,7 +522,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="gallery-item">&#128247;</div>
     </div>
   </section>
-  <section class="section">
+  <section class="section" id="rsvp">
     <div class="rsvp-card">
       <h2>RSVP</h2>
       <p class="sub" style="color: rgba(255,255,255,0.4);">conferma entro il 1 aprile</p>
@@ -543,6 +547,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: -apple-system, 'Helvetica Neue', sans-serif; color: #111; background: #fff; overflow-x: hidden; }
   @keyframes slideLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
   @keyframes slideRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
@@ -609,7 +614,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <body>
   <nav class="nav">
     <span class="nav-brand">F<span class="accent">&amp;</span>V</span>
-    <div class="nav-links"><a href="#">Info</a><a href="#">Gallery</a><a href="#">RSVP</a></div>
+    <div class="nav-links"><a href="#info">Info</a><a href="#gallery">Gallery</a><a href="#rsvp">RSVP</a></div>
   </nav>
   <section class="hero">
     <div class="hero-left">
@@ -634,7 +639,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="countdown-item"><div class="num">05</div><div class="lbl">Min</div></div>
     </div>
   </section>
-  <section class="section" style="padding-top:0;">
+  <section class="section" id="info" style="padding-top:0;">
     <span class="tag">Info</span>
     <h2>I Dettagli</h2>
     <div class="info-blocks" style="margin-top: 2rem;">
@@ -644,7 +649,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="info-block"><h3>Parcheggio</h3><p>Parcheggio interno<br/>gratuito per gli ospiti</p></div>
     </div>
   </section>
-  <section class="section bg-dark">
+  <section class="section bg-dark" id="gallery">
     <span class="tag">Gallery</span>
     <h2>Momenti</h2>
     <div class="geo-grid" style="max-width:600px; margin-top: 2rem;">
@@ -659,7 +664,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="geo-item">&#128247;</div>
     </div>
   </section>
-  <section class="rsvp">
+  <section class="rsvp" id="rsvp">
     <h2>RSVP</h2>
     <p>Conferma la tua presenza entro Settembre 2026</p>
     <div class="rsvp-form">
@@ -680,6 +685,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #2c4a5a; background: #f0f7fa; overflow-x: hidden; }
   @keyframes wave { 0% { transform: translateX(0) translateZ(0) scaleY(1); } 50% { transform: translateX(-25%) translateZ(0) scaleY(0.55); } 100% { transform: translateX(-50%) translateZ(0) scaleY(1); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
@@ -738,7 +744,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <body>
   <nav class="nav">
     <span class="nav-brand">P &amp; S</span>
-    <div class="nav-links"><a href="#">Programma</a><a href="#">Galleria</a><a href="#">Info</a><a href="#">RSVP</a></div>
+    <div class="nav-links"><a href="#programma">Programma</a><a href="#galleria">Galleria</a><a href="#info">Info</a><a href="#rsvp">RSVP</a></div>
   </nav>
   <section class="hero">
     <div>
@@ -754,7 +760,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     <div class="story-seaside"><p>Ci siamo incontrati su una barca a vela al largo della Costiera Amalfitana. Il sole, il vento e le onde ci hanno uniti per sempre. Ora vi invitiamo a celebrare il nostro amore nello stesso luogo magico.</p></div>
   </section>
   <div class="quote-sea"><p>"L'amore &egrave; come il mare: lo puoi vedere all'infinito, ma non puoi vederne la fine."</p></div>
-  <section class="section bg-sand">
+  <section class="section bg-sand" id="programma">
     <h2>Il Programma</h2>
     <p class="sub">la nostra giornata</p>
     <div class="info-row">
@@ -763,7 +769,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="info-item"><div class="icon">&#127878;</div><h3>Ricevimento</h3><p>Villa Cimbrone<br/>Ore 19:30</p></div>
     </div>
   </section>
-  <section class="section">
+  <section class="section" id="galleria">
     <h2>Galleria</h2>
     <p class="sub">i nostri momenti</p>
     <div class="gallery-sea">
@@ -774,7 +780,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="item">&#127754;</div>
     </div>
   </section>
-  <section class="section bg-ocean">
+  <section class="section bg-ocean" id="info">
     <h2>Come Arrivare</h2>
     <p class="sub">informazioni utili</p>
     <div class="travel-info">
@@ -784,7 +790,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="travel-card"><h3>Dress Code</h3><p>Elegante estivo. Colori chiari. Scarpe comode!</p></div>
     </div>
   </section>
-  <section class="section rsvp-sea">
+  <section class="section rsvp-sea" id="rsvp">
     <h2>RSVP</h2>
     <p class="sub">conferma la tua presenza</p>
     <div class="rsvp-form">
@@ -809,6 +815,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #4a3f35; background: #f5f0e8; overflow-x: hidden; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -866,7 +873,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <body>
   <nav class="nav">
     <span class="nav-brand">R &amp; B</span>
-    <div class="nav-links"><a href="#">Location</a><a href="#">Menu</a><a href="#">Galleria</a><a href="#">RSVP</a></div>
+    <div class="nav-links"><a href="#location">Location</a><a href="#menu">Menu</a><a href="#galleria">Galleria</a><a href="#rsvp">RSVP</a></div>
   </nav>
   <section class="hero">
     <div class="hero-frame">
@@ -881,7 +888,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     <p class="sub">un amore tra le colline</p>
     <div class="story-tuscan"><p>Ci siamo incontrati durante una degustazione di vini nel cuore del Chianti. Tra calici di Brunello e tramonti dorati, abbiamo capito che eravamo destinati a stare insieme. Oggi vi invitiamo a brindare con noi.</p></div>
   </section>
-  <section class="section bg-stone">
+  <section class="section bg-stone" id="location">
     <h2>La Location</h2>
     <p class="sub">villa dei cipressi, chianti</p>
     <div class="villa-info">
@@ -892,7 +899,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
     </div>
   </section>
   <div class="quote-tuscan"><p>"Il vino &egrave; la poesia della terra. L'amore &egrave; la poesia dell'anima."</p></div>
-  <section class="section">
+  <section class="section" id="menu">
     <h2>Il Menu</h2>
     <p class="sub">sapori della tradizione</p>
     <div class="menu-tuscan">
@@ -901,7 +908,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="menu-course"><div class="icon">&#127856;</div><h4>Dolci</h4><p>Torta nuziale<br/>Cantucci e Vin Santo<br/>Gelato artigianale</p></div>
     </div>
   </section>
-  <section class="section bg-stone">
+  <section class="section bg-stone" id="galleria">
     <h2>Galleria</h2>
     <p class="sub">scorci toscani</p>
     <div class="gallery-grid">
@@ -911,7 +918,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
       <div class="gallery-item">&#128247;</div>
     </div>
   </section>
-  <section class="section bg-terracotta">
+  <section class="section bg-terracotta" id="rsvp">
     <h2>RSVP</h2>
     <p class="sub" style="color:rgba(245,240,232,0.5)">conferma la tua presenza</p>
     <div class="rsvp-form">
@@ -936,6 +943,7 @@ export const TEMPLATE_DEMOS: Record<string, string> = {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body { font-family: 'Georgia', serif; color: #3a3a3a; background: #fafaf8; overflow-x: hidden; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }

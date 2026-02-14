@@ -22,6 +22,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/amore-eterno-mobile.jpg',
     features: ['Design responsivo', 'Animazioni floreali', 'Galleria foto', 'Countdown', 'RSVP base', 'Mappa evento'],
     isActive: true,
+    designer: { name: 'Valentina Rossi', portfolio: 'valentinadesign.it' },
   },
   {
     id: 'tpl-002',
@@ -43,6 +44,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/minimal-love-mobile.jpg',
     features: ['Design minimalista', 'Tipografia premium', 'Countdown', 'RSVP base', 'Sezione info'],
     isActive: true,
+    designer: { name: 'Marco Bianchi', portfolio: 'marcobianchi.design' },
   },
   {
     id: 'tpl-003',
@@ -66,6 +68,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/golden-palace-mobile.jpg',
     features: ['Design luxury', 'Animazioni cinematografiche', 'Parallax', 'Galleria avanzata', 'Countdown animato', 'RSVP avanzato', 'Mappa 3D', 'Musica di sottofondo'],
     isActive: true,
+    designer: { name: 'Alessia Moretti', portfolio: 'alessiamoretti.it' },
   },
   {
     id: 'tpl-004',
@@ -88,6 +91,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/boho-garden-mobile.jpg',
     features: ['Design boho', 'Illustrazioni botaniche', 'Galleria foto', 'Countdown', 'RSVP base', 'Mappa', 'Timeline evento'],
     isActive: true,
+    designer: { name: 'Chiara Fontana', portfolio: 'chiarafontana.com' },
   },
   {
     id: 'tpl-005',
@@ -110,6 +114,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/modern-metro-mobile.jpg',
     features: ['Design moderno', 'Micro-interazioni', 'Galleria animata', 'Countdown', 'RSVP avanzato', 'Mappa interattiva', 'Timeline'],
     isActive: true,
+    designer: { name: 'Luca Ferretti', portfolio: 'lucaferretti.studio' },
   },
   {
     id: 'tpl-006',
@@ -131,6 +136,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/seaside-dream-mobile.jpg',
     features: ['Tema marino', 'Animazioni acqua', 'Galleria foto', 'Countdown', 'RSVP avanzato', 'Mappa', 'Info viaggio'],
     isActive: true,
+    designer: { name: 'Sofia Greco', portfolio: 'sofiagreco.design' },
   },
   {
     id: 'tpl-007',
@@ -153,6 +159,7 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/tuscan-villa-mobile.jpg',
     features: ['Design rustico elegante', 'Texture pietra', 'Galleria foto', 'Countdown', 'RSVP avanzato', 'Mappa', 'Timeline', 'Info alloggio'],
     isActive: true,
+    designer: { name: 'Andrea Colombo', portfolio: 'andreacolombo.it' },
   },
   {
     id: 'tpl-008',
@@ -174,5 +181,6 @@ export const TEMPLATES: Template[] = [
     mobilePreviewUrl: '/images/templates/elopement-story-mobile.jpg',
     features: ['Layout storytelling', 'Transizioni cinematografiche', 'Galleria foto', 'Countdown', 'RSVP semplice'],
     isActive: true,
+    designer: { name: 'Elena Mancini', portfolio: 'elenamancini.art' },
   },
 ];
