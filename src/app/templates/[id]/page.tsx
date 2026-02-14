@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles } from 'lucide-react';
+import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles, Eye } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { ADDONS } from '@/data/addons';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
@@ -11,6 +11,14 @@ import { useCart } from '@/hooks/useCart';
 import { formatPrice, MOOD_LABELS, EVENT_TYPE_LABELS, ADDON_CATEGORY_LABELS } from '@/lib/utils';
 import { AddonCategory } from '@/types';
 import LivePreviewModal from '@/components/LivePreviewModal';
+import ProgressIndicator from '@/components/ProgressIndicator';
+
+const PURCHASE_STEPS = [
+  { label: 'Template' },
+  { label: 'Add-on' },
+  { label: 'Carrello' },
+  { label: 'Pagamento' },
+];
 
 export default function TemplateDetailPage() {
   const params = useParams();
@@ -92,9 +100,10 @@ export default function TemplateDetailPage() {
         />
       )}
 
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <Link href="/templates" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+      {/* Progress + Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <ProgressIndicator steps={PURCHASE_STEPS} currentStep={1} total={totalPrice} />
+        <Link href="/templates" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mt-4">
           <ArrowLeft className="w-4 h-4" />
           Tutti i Template
         </Link>

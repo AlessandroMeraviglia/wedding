@@ -6,6 +6,14 @@ import Link from 'next/link';
 import { ArrowLeft, CreditCard, Lock, ShieldCheck, Heart, Sparkles, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
+import ProgressIndicator from '@/components/ProgressIndicator';
+
+const PURCHASE_STEPS = [
+  { label: 'Template' },
+  { label: 'Add-on' },
+  { label: 'Carrello' },
+  { label: 'Pagamento' },
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -86,6 +94,8 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ProgressIndicator steps={PURCHASE_STEPS} currentStep={3} total={total} />
+
         <Link href="/cart" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
           <ArrowLeft className="w-4 h-4" />
           Torna al carrello

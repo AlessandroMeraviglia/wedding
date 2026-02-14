@@ -6,6 +6,14 @@ import { Trash2, Plus, ShoppingCart, ArrowLeft, ArrowRight, Heart, ShieldCheck, 
 import { useCart } from '@/hooks/useCart';
 import { ADDONS } from '@/data/addons';
 import { formatPrice, ADDON_CATEGORY_LABELS } from '@/lib/utils';
+import ProgressIndicator from '@/components/ProgressIndicator';
+
+const PURCHASE_STEPS = [
+  { label: 'Template' },
+  { label: 'Add-on' },
+  { label: 'Carrello' },
+  { label: 'Pagamento' },
+];
 
 export default function CartPage() {
   const router = useRouter();
@@ -41,6 +49,9 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Progress */}
+        <ProgressIndicator steps={PURCHASE_STEPS} currentStep={2} total={total} />
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -48,7 +59,7 @@ export default function CartPage() {
               <ArrowLeft className="w-4 h-4" />
               Continua lo shopping
             </Link>
-            <h1 className="text-3xl font-bold text-foreground">Il Tuo Carrello</h1>
+            <h1 className="text-3xl font-bold text-foreground">STEP 3: Il Tuo Carrello</h1>
           </div>
           <button
             onClick={clearCart}
