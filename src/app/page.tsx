@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Palette, CreditCard, Rocket, Star, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Heart, Palette, CreditCard, Rocket, Star, Check, ArrowRight, Sparkles, ImageIcon, Upload } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
+import { TEMPLATE_DEMOS } from '@/data/templateDemos';
 import { formatPrice } from '@/lib/utils';
 
 const STEPS = [
@@ -23,13 +24,18 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero with Emotional Image Space */}
       <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-white to-secondary">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
+        {/* Emotional background - admin can replace this with uploaded image */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-50/80 via-white/60 to-rose-50/80 z-10" />
+          <div className="absolute inset-0 opacity-[0.03]">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
+            <div className="absolute top-40 right-1/3 w-64 h-64 bg-pink-300 rounded-full blur-3xl" />
+          </div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-8">
               <Heart className="w-4 h-4 fill-primary" />
@@ -113,8 +119,17 @@ export default function HomePage() {
             {featuredTemplates.map((tpl) => (
               <Link key={tpl.id} href={`/templates/${tpl.slug}`} className="group">
                 <div className="bg-white rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all hover:-translate-y-1">
-                  <div className="aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
-                    <Heart className="w-16 h-16 text-primary/20" />
+                  <div className="aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center overflow-hidden relative">
+                    {TEMPLATE_DEMOS[tpl.slug] ? (
+                      <iframe
+                        srcDoc={TEMPLATE_DEMOS[tpl.slug]}
+                        className="w-full h-full border-0 pointer-events-none"
+                        title={tpl.name}
+                        sandbox="allow-same-origin"
+                      />
+                    ) : (
+                      <Heart className="w-16 h-16 text-primary/20" />
+                    )}
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
@@ -170,6 +185,52 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Emotional Image Showcase */}
+      <section className="py-24 bg-muted/30 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Ogni Dettaglio Conta</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              I nostri siti catturano l&apos;emozione del vostro giorno speciale
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Emotional image placeholders - admin can upload real images */}
+            <div className="aspect-[3/4] bg-gradient-to-br from-pink-100 to-rose-200 rounded-2xl flex items-center justify-center group hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="text-center">
+                <Heart className="w-10 h-10 text-primary/30 mx-auto mb-2" />
+                <p className="text-xs text-primary/40 font-medium">La Cerimonia</p>
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all" />
+            </div>
+            <div className="aspect-[3/4] bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl flex items-center justify-center group hover:shadow-xl transition-all hover:-translate-y-1 mt-8 relative overflow-hidden">
+              <div className="text-center">
+                <Sparkles className="w-10 h-10 text-amber-300/50 mx-auto mb-2" />
+                <p className="text-xs text-amber-400/60 font-medium">I Dettagli</p>
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all" />
+            </div>
+            <div className="aspect-[3/4] bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl flex items-center justify-center group hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="text-center">
+                <ImageIcon className="w-10 h-10 text-blue-300/50 mx-auto mb-2" />
+                <p className="text-xs text-blue-400/60 font-medium">Il Ricevimento</p>
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all" />
+            </div>
+            <div className="aspect-[3/4] bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl flex items-center justify-center group hover:shadow-xl transition-all hover:-translate-y-1 mt-8 relative overflow-hidden">
+              <div className="text-center">
+                <Star className="w-10 h-10 text-purple-300/50 mx-auto mb-2" />
+                <p className="text-xs text-purple-400/60 font-medium">La Festa</p>
+              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all" />
+            </div>
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-8">
+            Le immagini verranno personalizzate dal team admin
+          </p>
         </div>
       </section>
 

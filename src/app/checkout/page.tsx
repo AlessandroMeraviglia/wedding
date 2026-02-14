@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CreditCard, Lock, ShieldCheck, Heart, Sparkles } from 'lucide-react';
+import { ArrowLeft, CreditCard, Lock, ShieldCheck, Heart, Sparkles, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 
@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
+  const [cartError, setCartError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -23,8 +24,31 @@ export default function CheckoutPage() {
     return null;
   }
 
+  // Cart verification
+  const verifyCart = (): boolean => {
+    if (!cart.template) {
+      setCartError('Nessun template selezionato. Torna al catalogo e scegli un template.');
+      return false;
+    }
+    if (cart.template.price <= 0) {
+      setCartError('Il prezzo del template non è valido.');
+      return false;
+    }
+    const invalidAddon = cart.selectedAddons.find(a => !a.id || !a.name || a.price < 0);
+    if (invalidAddon) {
+      setCartError(`Add-on non valido: ${invalidAddon.name || 'sconosciuto'}`);
+      return false;
+    }
+    setCartError(null);
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verify cart before proceeding
+    if (!verifyCart()) return;
+
     setIsLoading(true);
 
     try {
@@ -77,6 +101,19 @@ export default function CheckoutPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Cart Verification Error */}
+                {cartError && (
+                  <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-red-800">{cartError}</p>
+                      <Link href="/templates" className="text-xs text-red-600 hover:text-red-800 underline mt-1 inline-block">
+                        Torna ai template
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
                 {/* Contact Info */}
                 <div>
                   <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Informazioni di Contatto</h2>

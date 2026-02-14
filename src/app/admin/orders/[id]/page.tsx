@@ -2,9 +2,11 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   ArrowLeft, User, Calendar, MapPin, CreditCard, FileText,
-  Clock, CheckCircle, Send, MessageSquare
+  Clock, CheckCircle, Send, MessageSquare, Download, Upload,
+  Image, Edit3, Save, X, FolderOpen, Trash2
 } from 'lucide-react';
 import { formatPrice, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/utils';
 
@@ -40,6 +42,19 @@ const ORDER = {
     weddingDate: '2026-06-15',
     location: 'Villa Borghese, Roma',
     isComplete: true,
+    photoUrls: [
+      '/uploads/marco-giulia/photo1.jpg',
+      '/uploads/marco-giulia/photo2.jpg',
+      '/uploads/marco-giulia/photo3.jpg',
+    ],
+    customTexts: {
+      heroTitle: 'Marco & Giulia',
+      heroSubtitle: 'Vi invitiamo al nostro matrimonio',
+      storyTitle: 'La Nostra Storia',
+      storyText: 'Ci siamo conosciuti in una sera d\'estate...',
+      rsvpTitle: 'Conferma la Tua Presenza',
+      footerText: 'Marco & Giulia - 15 Giugno 2026',
+    },
   },
   timeline: [
     { status: 'PENDING_PAYMENT', note: 'Ordine creato', date: '2026-02-13 10:30' },
@@ -54,6 +69,8 @@ const ORDER = {
 
 export default function OrderDetailPage() {
   const params = useParams();
+  const [editingTexts, setEditingTexts] = useState(false);
+  const [formTexts, setFormTexts] = useState(ORDER.formSubmission.customTexts);
 
   return (
     <div>
@@ -165,6 +182,119 @@ export default function OrderDetailPage() {
             <div className="mt-4 flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-success" />
               <span className="text-xs font-medium text-success">Modulo completato</span>
+            </div>
+          </div>
+
+          {/* File Manager - Photos */}
+          <div className="bg-white rounded-2xl border border-border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                <FolderOpen className="w-4 h-4 text-primary" />
+                Gestione File Cliente
+              </h2>
+              <label className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 cursor-pointer">
+                <Upload className="w-3 h-3" />
+                Carica Foto
+                <input type="file" className="hidden" accept="image/*" multiple />
+              </label>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {ORDER.formSubmission.photoUrls.map((url, i) => (
+                <div key={i} className="relative group">
+                  <div className="aspect-square bg-gradient-to-br from-secondary to-muted rounded-xl flex items-center justify-center border border-border">
+                    <Image className="w-8 h-8 text-primary/20" />
+                  </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-xl transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <button className="p-1.5 bg-white rounded-lg text-foreground hover:bg-blue-50 transition-colors" title="Scarica">
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                    <button className="p-1.5 bg-white rounded-lg text-foreground hover:bg-red-50 transition-colors" title="Elimina">
+                      <Trash2 className="w-3.5 h-3.5 text-error" />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1 truncate">photo{i + 1}.jpg</p>
+                </div>
+              ))}
+              {/* Upload placeholder */}
+              <label className="aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all">
+                <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                <span className="text-[10px] text-muted-foreground">Carica</span>
+                <input type="file" className="hidden" accept="image/*" />
+              </label>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors">
+                <Download className="w-3.5 h-3.5" />
+                Scarica Tutti
+              </button>
+              <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80 transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                Ricarica Foto
+              </button>
+            </div>
+          </div>
+
+          {/* Form Text Editor */}
+          <div className="bg-white rounded-2xl border border-border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-primary" />
+                Testi del Sito
+              </h2>
+              {!editingTexts ? (
+                <button
+                  onClick={() => setEditingTexts(true)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20"
+                >
+                  <Edit3 className="w-3 h-3" />
+                  Modifica
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setEditingTexts(false); }}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium hover:bg-success/20"
+                  >
+                    <Save className="w-3 h-3" />
+                    Salva
+                  </button>
+                  <button
+                    onClick={() => { setEditingTexts(false); setFormTexts(ORDER.formSubmission.customTexts); }}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted/80"
+                  >
+                    <X className="w-3 h-3" />
+                    Annulla
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-4">
+              {Object.entries(formTexts).map(([key, value]) => (
+                <div key={key}>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1 capitalize">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </label>
+                  {editingTexts ? (
+                    key.includes('Text') || key.includes('text') ? (
+                      <textarea
+                        value={value}
+                        onChange={(e) => setFormTexts(prev => ({ ...prev, [key]: e.target.value }))}
+                        rows={3}
+                        className="w-full px-3 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => setFormTexts(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    )
+                  ) : (
+                    <p className="text-sm text-foreground bg-muted/30 px-3 py-2 rounded-xl">{value}</p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

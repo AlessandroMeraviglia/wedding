@@ -3,12 +3,14 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Heart, Check, ShoppingCart, Eye, ArrowLeft, Monitor, Smartphone, Star } from 'lucide-react';
+import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { ADDONS } from '@/data/addons';
+import { TEMPLATE_DEMOS } from '@/data/templateDemos';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice, MOOD_LABELS, EVENT_TYPE_LABELS, ADDON_CATEGORY_LABELS } from '@/lib/utils';
-import { Addon, AddonCategory } from '@/types';
+import { AddonCategory } from '@/types';
+import LivePreviewModal from '@/components/LivePreviewModal';
 
 export default function TemplateDetailPage() {
   const params = useParams();
@@ -16,6 +18,7 @@ export default function TemplateDetailPage() {
   const { cart, setTemplate, toggleAddon } = useCart();
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [activeAddonCategory, setActiveAddonCategory] = useState<AddonCategory | 'ALL'>('ALL');
+  const [showLivePreview, setShowLivePreview] = useState(false);
 
   const template = useMemo(
     () => TEMPLATES.find(t => t.slug === params.id),
@@ -26,6 +29,16 @@ export default function TemplateDetailPage() {
     if (activeAddonCategory === 'ALL') return ADDONS;
     return ADDONS.filter(a => a.category === activeAddonCategory);
   }, [activeAddonCategory]);
+
+  // Related templates by same mood or eventType
+  const relatedTemplates = useMemo(() => {
+    if (!template) return [];
+    return TEMPLATES.filter(t =>
+      t.id !== template.id &&
+      t.isActive &&
+      (t.mood === template.mood || t.eventType === template.eventType)
+    ).slice(0, 3);
+  }, [template]);
 
   if (!template) {
     return (
@@ -41,6 +54,7 @@ export default function TemplateDetailPage() {
   }
 
   const isSelected = cart.template?.id === template.id;
+  const demoHtml = TEMPLATE_DEMOS[template.slug] || '';
 
   const handleSelectTemplate = () => {
     setTemplate(template);
@@ -57,8 +71,27 @@ export default function TemplateDetailPage() {
 
   const recommendedAddons = ADDONS.filter(a => a.isRecommended);
 
+  // Calculate prices for floating bar
+  const templatePrice = template.price;
+  const addonsTotal = cart.selectedAddons.reduce((sum, a) => sum + a.price, 0);
+  const totalPrice = templatePrice + addonsTotal;
+
+  // Active addon names for live preview
+  const activeAddonNames = cart.selectedAddons.map(a => a.name);
+
   return (
     <div className="min-h-screen">
+      {/* Live Preview Modal */}
+      {demoHtml && (
+        <LivePreviewModal
+          isOpen={showLivePreview}
+          onClose={() => setShowLivePreview(false)}
+          templateName={template.name}
+          htmlContent={demoHtml}
+          activeAddons={activeAddonNames}
+        />
+      )}
+
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <Link href="/templates" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -94,11 +127,47 @@ export default function TemplateDetailPage() {
                   </button>
                 </div>
               </div>
-              <div className={`aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center ${previewMode === 'mobile' ? 'max-w-[280px] mx-auto' : ''}`}>
-                <div className="text-center">
-                  <Heart className="w-20 h-20 text-primary/20 mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground">Anteprima {template.name}</p>
-                </div>
+              <div className={`aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center relative ${previewMode === 'mobile' ? 'max-w-[280px] mx-auto' : ''}`}>
+                {demoHtml ? (
+                  <iframe
+                    srcDoc={demoHtml}
+                    className="w-full h-full border-0 pointer-events-none"
+                    title={`Anteprima ${template.name}`}
+                    sandbox="allow-same-origin"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <Heart className="w-20 h-20 text-primary/20 mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground">Anteprima {template.name}</p>
+                  </div>
+                )}
+
+                {/* LIVE Button Overlay */}
+                {demoHtml && (
+                  <button
+                    onClick={() => setShowLivePreview(true)}
+                    className="absolute bottom-4 right-4 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-full font-bold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-105 z-10"
+                  >
+                    <Play className="w-4 h-4 fill-white" />
+                    <span>LIVE</span>
+                  </button>
+                )}
+
+                {/* Addon indicators on preview */}
+                {cart.selectedAddons.length > 0 && (
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10 max-w-[200px]">
+                    {cart.selectedAddons.slice(0, 3).map(addon => (
+                      <span key={addon.id} className="bg-primary/90 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        {addon.name}
+                      </span>
+                    ))}
+                    {cart.selectedAddons.length > 3 && (
+                      <span className="bg-primary/90 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        +{cart.selectedAddons.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -175,6 +244,26 @@ export default function TemplateDetailPage() {
                 Procedi al Carrello
               </button>
             </div>
+
+            {/* PERSONALIZZA Button */}
+            <a
+              href="#addons"
+              className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-accent/10 text-accent hover:bg-accent/20 transition-all border border-accent/20"
+            >
+              <Sparkles className="w-4 h-4" />
+              PERSONALIZZA con gli Add-on
+            </a>
+
+            {/* LIVE Preview CTA */}
+            {demoHtml && (
+              <button
+                onClick={() => setShowLivePreview(true)}
+                className="mt-3 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-green-50 text-green-700 hover:bg-green-100 transition-all border border-green-200"
+              >
+                <Play className="w-4 h-4 fill-green-700" />
+                Vedi Anteprima LIVE del Template
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -275,29 +364,89 @@ export default function TemplateDetailPage() {
               </button>
             ))}
           </div>
-
-          {/* Floating Cart Summary */}
-          {(isSelected || cart.selectedAddons.length > 0) && (
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border shadow-2xl z-40 animate-slide-up">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {cart.template?.name || 'Nessun template'} + {cart.selectedAddons.length} add-on
-                  </p>
-                  <p className="text-2xl font-bold text-primary">{formatPrice(cart.total)}</p>
-                </div>
-                <Link
-                  href="/cart"
-                  className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-full font-semibold transition-all hover:shadow-lg flex items-center gap-2"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Vai al Carrello
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </section>
+
+      {/* Related Templates Section */}
+      {relatedTemplates.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-foreground mb-4">Template Correlati</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Stesso stile, stessa emozione. Scopri altri template che potrebbero piacerti.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {relatedTemplates.map((tpl) => (
+                <Link key={tpl.id} href={`/templates/${tpl.slug}`} className="group">
+                  <div className="bg-white rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div className="aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center relative overflow-hidden">
+                      {TEMPLATE_DEMOS[tpl.slug] ? (
+                        <iframe
+                          srcDoc={TEMPLATE_DEMOS[tpl.slug]}
+                          className="w-full h-full border-0 pointer-events-none"
+                          title={tpl.name}
+                          sandbox="allow-same-origin"
+                        />
+                      ) : (
+                        <Heart className="w-16 h-16 text-primary/20" />
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">{MOOD_LABELS[tpl.mood]}</span>
+                        <span className="text-lg font-bold text-primary">{formatPrice(tpl.price)}</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{tpl.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{tpl.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Floating Cart Summary - Fixed price display */}
+      {(isSelected || cart.selectedAddons.length > 0) && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border shadow-2xl z-40 animate-slide-up">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {cart.template?.name || template.name} + {cart.selectedAddons.length} add-on
+              </p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-primary">{formatPrice(totalPrice)}</p>
+                {addonsTotal > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    (Template {formatPrice(templatePrice)} + Add-on {formatPrice(addonsTotal)})
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {demoHtml && (
+                <button
+                  onClick={() => setShowLivePreview(true)}
+                  className="hidden sm:flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-full font-bold text-sm transition-all"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  LIVE
+                </button>
+              )}
+              <Link
+                href="/cart"
+                className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-full font-semibold transition-all hover:shadow-lg flex items-center gap-2"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                Vai al Carrello
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

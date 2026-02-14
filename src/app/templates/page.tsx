@@ -2,15 +2,18 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Heart, Search, SlidersHorizontal, Eye, ShoppingCart } from 'lucide-react';
+import { Heart, Search, SlidersHorizontal, Eye, ShoppingCart, Play } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
+import { TEMPLATE_DEMOS } from '@/data/templateDemos';
 import { TemplateMood, EventType, BudgetTier, TemplateFilters } from '@/types';
 import { formatPrice, MOOD_LABELS, EVENT_TYPE_LABELS, BUDGET_LABELS } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart';
+import LivePreviewModal from '@/components/LivePreviewModal';
 
 export default function TemplatesPage() {
   const [filters, setFilters] = useState<TemplateFilters>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [livePreviewSlug, setLivePreviewSlug] = useState<string | null>(null);
   const { setTemplate } = useCart();
 
   const filtered = useMemo(() => {
@@ -41,8 +44,19 @@ export default function TemplatesPage() {
     setTemplate(template);
   };
 
+  const livePreviewTemplate = livePreviewSlug ? TEMPLATES.find(t => t.slug === livePreviewSlug) : null;
+
   return (
     <div className="min-h-screen">
+      {/* Live Preview Modal */}
+      {livePreviewTemplate && TEMPLATE_DEMOS[livePreviewTemplate.slug] && (
+        <LivePreviewModal
+          isOpen={!!livePreviewSlug}
+          onClose={() => setLivePreviewSlug(null)}
+          templateName={livePreviewTemplate.name}
+          htmlContent={TEMPLATE_DEMOS[livePreviewTemplate.slug]}
+        />
+      )}
       {/* Header */}
       <section className="bg-gradient-to-br from-secondary via-white to-secondary py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -168,7 +182,26 @@ export default function TemplatesPage() {
             <div key={tpl.id} className="group bg-white rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all hover:-translate-y-1">
               {/* Preview Image */}
               <div className="relative aspect-[4/3] bg-gradient-to-br from-secondary to-muted flex items-center justify-center overflow-hidden">
-                <Heart className="w-20 h-20 text-primary/15" />
+                {TEMPLATE_DEMOS[tpl.slug] ? (
+                  <iframe
+                    srcDoc={TEMPLATE_DEMOS[tpl.slug]}
+                    className="w-full h-full border-0 pointer-events-none"
+                    title={tpl.name}
+                    sandbox="allow-same-origin"
+                  />
+                ) : (
+                  <Heart className="w-20 h-20 text-primary/15" />
+                )}
+                {/* LIVE Badge */}
+                {TEMPLATE_DEMOS[tpl.slug] && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLivePreviewSlug(tpl.slug); }}
+                    className="absolute top-3 right-3 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-full font-bold text-xs shadow-lg transition-all hover:scale-105 z-10"
+                  >
+                    <Play className="w-3 h-3 fill-white" />
+                    LIVE
+                  </button>
+                )}
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                   <Link
