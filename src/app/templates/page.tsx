@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { Heart, Search, SlidersHorizontal, Eye, ShoppingCart, Play, Check, ArrowRight, Star, TrendingUp, Award } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Heart, Search, SlidersHorizontal, ShoppingCart, Play, Check, ArrowRight, Award } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { ADDONS } from '@/data/addons';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
@@ -28,6 +28,7 @@ const PURCHASE_STEPS = [
 ];
 
 export default function TemplatesPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState<TemplateFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   const [livePreviewSlug, setLivePreviewSlug] = useState<string | null>(null);
@@ -59,6 +60,8 @@ export default function TemplatesPage() {
 
   const handleSelect = (template: typeof TEMPLATES[0]) => {
     setTemplate(template);
+    // Navigate directly to template detail page (add-on step)
+    router.push(`/templates/${template.slug}`);
   };
 
   const livePreviewTemplate = livePreviewSlug ? TEMPLATES.find(t => t.slug === livePreviewSlug) : null;
@@ -77,6 +80,11 @@ export default function TemplatesPage() {
           selectedAddonIds={cart.selectedAddons.map(a => a.id)}
           onToggleAddon={toggleAddon}
           totalPrice={(livePreviewTemplate.price ?? 0) + cart.selectedAddons.reduce((s, a) => s + a.price, 0)}
+          templatePrice={livePreviewTemplate.price}
+          onProceedToCart={() => {
+            setLivePreviewSlug(null);
+            router.push('/cart');
+          }}
         />
       )}
 
@@ -90,7 +98,7 @@ export default function TemplatesPage() {
               STEP 1: Scegli il <span className="text-primary">Template</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              8 design premium con anteprima LIVE. Naviga il template prima di acquistarlo.
+              8 design premium con anteprima LIVE. Seleziona il template e procedi alla personalizzazione.
             </p>
           </div>
         </div>
@@ -248,25 +256,18 @@ export default function TemplatesPage() {
                       LIVE
                     </button>
                   )}
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
-                    <Link
-                      href={`/templates/${tpl.slug}`}
-                      className="bg-white text-foreground px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-primary hover:text-white transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Anteprima
-                    </Link>
-                    {TEMPLATE_DEMOS[tpl.slug] && (
+                  {/* Hover overlay - only LIVE button */}
+                  {TEMPLATE_DEMOS[tpl.slug] && (
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLivePreviewSlug(tpl.slug); }}
-                        className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-green-600 transition-colors"
+                        className="bg-green-500 text-white px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-green-600 transition-colors shadow-lg"
                       >
                         <Play className="w-4 h-4 fill-white" />
-                        LIVE
+                        Anteprima LIVE
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Content */}
@@ -279,14 +280,12 @@ export default function TemplatesPage() {
                     </div>
                     <span className="text-2xl font-bold text-primary">{formatPrice(tpl.price)}</span>
                   </div>
-                  <Link href={`/templates/${tpl.slug}`}>
-                    <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {tpl.name}
-                    </h3>
-                  </Link>
+                  <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {tpl.name}
+                  </h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{tpl.description}</p>
 
-                  {/* Micro features — clear yes/no list */}
+                  {/* Micro features */}
                   <div className="grid grid-cols-2 gap-1 mb-4">
                     {tpl.features.slice(0, 6).map((f) => (
                       <div key={f} className="flex items-center gap-1.5 text-[11px] text-foreground">
@@ -296,7 +295,7 @@ export default function TemplatesPage() {
                     ))}
                   </div>
 
-                  {/* Strong CTA */}
+                  {/* CTA - Select template and go to add-on step */}
                   <button
                     onClick={() => handleSelect(tpl)}
                     className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
@@ -308,12 +307,14 @@ export default function TemplatesPage() {
                     {isInCart ? (
                       <>
                         <Check className="w-4 h-4" />
-                        Selezionato
+                        Selezionato — Personalizza
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     ) : (
                       <>
                         <ShoppingCart className="w-4 h-4" />
-                        Scegli Questo Template
+                        Scegli e Personalizza
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>

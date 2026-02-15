@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Image as ImageIcon, Film, Upload, Trash2, Save, Link as LinkIcon,
-  ExternalLink, CheckCircle, AlertCircle, Loader2
+  ExternalLink, CheckCircle, AlertCircle, Loader2, RefreshCw
 } from 'lucide-react';
 
 interface MediaSlot {
@@ -87,6 +87,33 @@ const INITIAL_MEDIA_SLOTS: MediaSlot[] = [
 export default function AdminMediaPage() {
   const [mediaSlots, setMediaSlots] = useState<MediaSlot[]>(INITIAL_MEDIA_SLOTS);
   const [savedNotice, setSavedNotice] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load existing files from server on mount
+  useEffect(() => {
+    async function loadMedia() {
+      try {
+        const res = await fetch('/api/admin/media');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.slots) {
+            setMediaSlots(prev => prev.map(slot => {
+              const serverSlot = data.slots.find((s: { id: string; src: string }) => s.id === slot.id);
+              if (serverSlot?.src) {
+                return { ...slot, currentSrc: serverSlot.src };
+              }
+              return slot;
+            }));
+          }
+        }
+      } catch {
+        // Ignore load errors
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadMedia();
+  }, []);
 
   const updateSlot = (id: string, updates: Partial<MediaSlot>) => {
     setMediaSlots(prev => prev.map(slot =>
@@ -115,16 +142,17 @@ export default function AdminMediaPage() {
         return;
       }
 
-      // Use the server-returned URL (e.g. /img/hero-bg.jpg)
+      // Use the server-returned URL with cache-bust
       updateSlot(slotId, {
-        currentSrc: data.url,
+        currentSrc: data.url + '?t=' + Date.now(),
         uploading: false,
         uploadError: undefined,
       });
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Errore di rete';
       updateSlot(slotId, {
         uploading: false,
-        uploadError: 'Errore di rete. Riprova.',
+        uploadError: `${message}. Riprova.`,
       });
     }
   };
@@ -140,6 +168,17 @@ export default function AdminMediaPage() {
     groups[section].push(slot);
     return groups;
   }, {} as Record<string, MediaSlot[]>);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 text-primary animate-spin mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">Caricamento media...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -352,7 +391,7 @@ export default function AdminMediaPage() {
                         <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
                           <CheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
                           <p className="text-xs text-green-700 font-medium truncate">
-                            File salvato: <code className="bg-green-100 px-1 rounded">{slot.currentSrc}</code>
+                            File salvato: <code className="bg-green-100 px-1 rounded">{slot.currentSrc.split('?')[0]}</code>
                           </p>
                         </div>
                       )}

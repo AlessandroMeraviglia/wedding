@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles, Eye, User } from 'lucide-react';
+import { Heart, Check, ShoppingCart, ArrowLeft, Monitor, Smartphone, Star, Play, Sparkles, User } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { ADDONS } from '@/data/addons';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
@@ -32,6 +32,13 @@ export default function TemplateDetailPage() {
     () => TEMPLATES.find(t => t.slug === params.id),
     [params.id]
   );
+
+  // Auto-select template when landing on this page
+  useEffect(() => {
+    if (template && cart.template?.id !== template.id) {
+      setTemplate(template);
+    }
+  }, [template, cart.template?.id, setTemplate]);
 
   const filteredAddons = useMemo(() => {
     if (activeAddonCategory === 'ALL') return ADDONS;
@@ -63,10 +70,6 @@ export default function TemplateDetailPage() {
   const isSelected = cart.template?.id === template.id;
   const demoHtml = TEMPLATE_DEMOS[template.slug] || '';
 
-  const handleSelectTemplate = () => {
-    setTemplate(template);
-  };
-
   const handleAddToCartAndProceed = () => {
     if (!isSelected) setTemplate(template);
     router.push('/cart');
@@ -86,7 +89,7 @@ export default function TemplateDetailPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Live Preview Modal - with addon overlays */}
+      {/* Live Preview Modal - with addon sidebar */}
       {demoHtml && (
         <LivePreviewModal
           isOpen={showLivePreview}
@@ -97,6 +100,11 @@ export default function TemplateDetailPage() {
           selectedAddonIds={selectedAddonIds}
           onToggleAddon={toggleAddon}
           totalPrice={totalPrice}
+          templatePrice={templatePrice}
+          onProceedToCart={() => {
+            setShowLivePreview(false);
+            router.push('/cart');
+          }}
         />
       )}
 
@@ -224,7 +232,7 @@ export default function TemplateDetailPage() {
               </div>
             </div>
 
-            {/* CTA Buttons — Only PERSONALIZZA and AGGIUNGI AL CARRELLO */}
+            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => {
@@ -234,7 +242,7 @@ export default function TemplateDetailPage() {
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-lg bg-accent hover:bg-accent/90 text-white transition-all hover:shadow-lg"
               >
                 <Sparkles className="w-5 h-5" />
-                Personalizza
+                Personalizza LIVE
               </button>
               <button
                 onClick={handleAddToCartAndProceed}
@@ -247,7 +255,7 @@ export default function TemplateDetailPage() {
                 {isSelected ? (
                   <>
                     <Check className="w-5 h-5" />
-                    Nel Carrello
+                    Vai al Carrello
                   </>
                 ) : (
                   <>
@@ -279,9 +287,11 @@ export default function TemplateDetailPage() {
       <section id="addons" className="bg-muted/50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Personalizza con gli Add-on</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              STEP 2: Personalizza con gli Add-on
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Aggiungi funzionalità extra al tuo sito. Le sezioni selezionate saranno visibili nell&apos;anteprima LIVE.
+              Aggiungi funzionalità extra al tuo sito. Clicca &quot;Personalizza LIVE&quot; per vedere il risultato in tempo reale.
             </p>
           </div>
 
