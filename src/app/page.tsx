@@ -111,34 +111,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Designers section — emphasis on professional designers */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold text-primary bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-wider">I Nostri Designer</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-4 mb-4">Creati da Designer Professionisti</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Ogni template è il frutto della creatività e della progettazione di designer professionisti
-              che scelgono di condividere il proprio talento sul nostro portale.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {TEMPLATES.slice(0, 4).map((tpl) => (
-              <div key={tpl.id} className="text-center group">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 mx-auto mb-3 flex items-center justify-center border border-primary/10 group-hover:border-primary/30 transition-colors">
-                  <User className="w-7 h-7 text-primary/60" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">{tpl.designer?.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Designer di {tpl.name}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            ...e altri designer professionisti collaborano con noi per offrirvi i migliori template.
-          </p>
-        </div>
-      </section>
-
       {/* How It Works — with personalization explanation */}
       <section id="how-it-works" className="py-24 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -199,6 +171,34 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Designers section — emphasis on professional designers */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <span className="text-xs font-bold text-primary bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-wider">I Nostri Designer</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mt-4 mb-4">Creati da Designer Professionisti</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Ogni template è il frutto della creatività e della progettazione di designer professionisti
+              che scelgono di condividere il proprio talento sul nostro portale.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {TEMPLATES.slice(0, 4).map((tpl) => (
+              <div key={tpl.id} className="text-center group">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 mx-auto mb-3 flex items-center justify-center border border-primary/10 group-hover:border-primary/30 transition-colors">
+                  <User className="w-7 h-7 text-primary/60" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">{tpl.designer?.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Designer di {tpl.name}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            ...e altri designer professionisti collaborano con noi per offrirvi i migliori template.
+          </p>
         </div>
       </section>
 
