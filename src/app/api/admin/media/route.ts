@@ -1,145 +1,173 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir, readdir, stat } from 'fs/promises';
+import { readFile, writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
-
-// Disable the default body parser size limit for this route
 export const runtime = 'nodejs';
 
+interface SlotConfig {
+  imageUrl: string;
+  videoUrl: string;
+  overlayColor: string;
+  overlayOpacity: number;
+}
+
+interface MediaConfig {
+  slots: Record<string, SlotConfig>;
+}
+
+const CONFIG_PATH = path.join(process.cwd(), 'data', 'media-config.json');
+
+async function loadConfig(): Promise<MediaConfig> {
+  try {
+    const raw = await readFile(CONFIG_PATH, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return { slots: {} };
+  }
+}
+
+async function saveConfig(config: MediaConfig): Promise<void> {
+  const dir = path.dirname(CONFIG_PATH);
+  await mkdir(dir, { recursive: true });
+  await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
+}
+
+const VALID_SLOT_IDS = [
+  'hero-bg',
+  'showcase-video',
+  'showcase-bg',
+  'gallery-1',
+  'gallery-2',
+  'gallery-3',
+  'gallery-4',
+];
+
+// POST: save media configuration (URLs, overlay settings)
 export async function POST(request: NextRequest) {
   try {
-    const contentType = request.headers.get('content-type') || '';
-    if (!contentType.includes('multipart/form-data')) {
-      return NextResponse.json(
-        { error: 'Content-Type deve essere multipart/form-data' },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
+    const { slotId, imageUrl, videoUrl, overlayColor, overlayOpacity } = body;
 
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const slotId = formData.get('slotId') as string | null;
-    const mediaType = formData.get('type') as string | null; // 'image' or 'video'
-
-    if (!file || !slotId || !mediaType) {
-      return NextResponse.json(
-        { error: 'File, slotId e type sono richiesti' },
-        { status: 400 }
-      );
-    }
-
-    // Validate slotId - only allow alphanumeric and hyphens
-    if (!/^[a-zA-Z0-9-]+$/.test(slotId)) {
+    if (!slotId || !VALID_SLOT_IDS.includes(slotId)) {
       return NextResponse.json(
         { error: 'slotId non valido' },
         { status: 400 }
       );
     }
 
-    // Validate file type
-    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const allowedVideoTypes = ['video/mp4', 'video/webm'];
-    const allowedTypes = mediaType === 'video' ? allowedVideoTypes : allowedImageTypes;
-
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: `Tipo di file non supportato: ${file.type}. Tipi ammessi: ${allowedTypes.join(', ')}` },
-        { status: 400 }
-      );
+    // Validate URLs if provided
+    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
+      try {
+        new URL(imageUrl);
+      } catch {
+        return NextResponse.json(
+          { error: 'URL immagine non valido' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Max file size: 50MB
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File troppo grande. Dimensione massima: 50MB' },
-        { status: 400 }
-      );
+    if (videoUrl && typeof videoUrl === 'string' && videoUrl.trim()) {
+      try {
+        new URL(videoUrl);
+      } catch {
+        return NextResponse.json(
+          { error: 'URL video non valido' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Determine target directory
-    const subDir = mediaType === 'video' ? 'video' : 'img';
-    const publicDir = path.join(process.cwd(), 'public', subDir);
+    // Validate overlay opacity
+    const opacity = typeof overlayOpacity === 'number'
+      ? Math.max(0, Math.min(100, overlayOpacity))
+      : 0;
 
-    // Ensure directory exists
-    await mkdir(publicDir, { recursive: true });
+    // Validate overlay color (hex)
+    const color = typeof overlayColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(overlayColor)
+      ? overlayColor
+      : '#000000';
 
-    // Generate filename using slotId to keep it organized
-    const originalExt = file.name.split('.').pop()?.toLowerCase();
-    const extMap: Record<string, string> = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp',
-      'video/mp4': 'mp4',
-      'video/webm': 'webm',
+    const config = await loadConfig();
+    config.slots[slotId] = {
+      imageUrl: (typeof imageUrl === 'string' ? imageUrl.trim() : '') || '',
+      videoUrl: (typeof videoUrl === 'string' ? videoUrl.trim() : '') || '',
+      overlayColor: color,
+      overlayOpacity: opacity,
     };
-    const ext = extMap[file.type] || originalExt || (mediaType === 'video' ? 'mp4' : 'jpg');
-    const filename = `${slotId}.${ext}`;
-    const filePath = path.join(publicDir, filename);
 
-    // Write file
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    await saveConfig(config);
 
-    // Verify file was written
-    const fileStat = await stat(filePath);
-
-    // Return the public URL
-    const publicUrl = `/${subDir}/${filename}`;
-
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      filename,
-      size: fileStat.size,
-      type: file.type,
-    });
+    return NextResponse.json({ success: true, slot: config.slots[slotId] });
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Save error:', error);
     const message = error instanceof Error ? error.message : 'Errore sconosciuto';
     return NextResponse.json(
-      { error: `Errore durante il caricamento: ${message}` },
+      { error: `Errore durante il salvataggio: ${message}` },
       { status: 500 }
     );
   }
 }
 
-// GET: retrieve current media configuration + check which files exist
-export async function GET() {
-  const slots = [
-    { id: 'hero-bg', section: 'Hero principale', type: 'image' as const, src: '', videoUrl: '' },
-    { id: 'showcase-video', section: 'Sezione Showcase', type: 'video' as const, src: '', videoUrl: '' },
-    { id: 'showcase-bg', section: 'Sezione Showcase', type: 'image' as const, src: '', videoUrl: '' },
-    { id: 'gallery-1', section: 'Galleria Ispirazioni', type: 'image' as const, src: '', videoUrl: '' },
-    { id: 'gallery-2', section: 'Galleria Ispirazioni', type: 'image' as const, src: '', videoUrl: '' },
-    { id: 'gallery-3', section: 'Galleria Ispirazioni', type: 'image' as const, src: '', videoUrl: '' },
-    { id: 'gallery-4', section: 'Galleria Ispirazioni', type: 'image' as const, src: '', videoUrl: '' },
-  ];
-
-  // Check actual files on disk
+// PUT: save all slots at once
+export async function PUT(request: NextRequest) {
   try {
-    const imgDir = path.join(process.cwd(), 'public', 'img');
-    const videoDir = path.join(process.cwd(), 'public', 'video');
+    const body = await request.json();
+    const { slots } = body;
 
-    let imgFiles: string[] = [];
-    let videoFiles: string[] = [];
-
-    try { imgFiles = await readdir(imgDir); } catch { /* dir may not exist */ }
-    try { videoFiles = await readdir(videoDir); } catch { /* dir may not exist */ }
-
-    for (const slot of slots) {
-      const dir = slot.type === 'video' ? videoFiles : imgFiles;
-      const prefix = slot.type === 'video' ? '/video/' : '/img/';
-      const matchingFile = dir.find(f => f.startsWith(slot.id + '.'));
-      if (matchingFile) {
-        slot.src = prefix + matchingFile;
-      }
+    if (!slots || typeof slots !== 'object') {
+      return NextResponse.json(
+        { error: 'Dati slots non validi' },
+        { status: 400 }
+      );
     }
-  } catch {
-    // Ignore errors reading disk
+
+    const config: MediaConfig = { slots: {} };
+
+    for (const [slotId, slotData] of Object.entries(slots)) {
+      if (!VALID_SLOT_IDS.includes(slotId)) continue;
+      const data = slotData as Partial<SlotConfig>;
+
+      config.slots[slotId] = {
+        imageUrl: (typeof data.imageUrl === 'string' ? data.imageUrl.trim() : '') || '',
+        videoUrl: (typeof data.videoUrl === 'string' ? data.videoUrl.trim() : '') || '',
+        overlayColor: (typeof data.overlayColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(data.overlayColor))
+          ? data.overlayColor
+          : '#000000',
+        overlayOpacity: typeof data.overlayOpacity === 'number'
+          ? Math.max(0, Math.min(100, data.overlayOpacity))
+          : 0,
+      };
+    }
+
+    await saveConfig(config);
+
+    return NextResponse.json({ success: true, slots: config.slots });
+  } catch (error) {
+    console.error('Save error:', error);
+    const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+    return NextResponse.json(
+      { error: `Errore durante il salvataggio: ${message}` },
+      { status: 500 }
+    );
   }
+}
+
+// GET: retrieve current media configuration
+export async function GET() {
+  const config = await loadConfig();
+
+  const slots = VALID_SLOT_IDS.map(id => {
+    const saved = config.slots[id];
+    return {
+      id,
+      imageUrl: saved?.imageUrl || '',
+      videoUrl: saved?.videoUrl || '',
+      overlayColor: saved?.overlayColor || '#000000',
+      overlayOpacity: saved?.overlayOpacity ?? 0,
+    };
+  });
 
   return NextResponse.json({ slots });
 }

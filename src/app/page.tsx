@@ -1,7 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Heart, Palette, CreditCard, Rocket, Star, Check, ArrowRight, Sparkles, Shield, Clock, Users, Zap, User, Play, Image as ImageIcon, Film } from 'lucide-react';
 import { TEMPLATES } from '@/data/templates';
 import { TEMPLATE_DEMOS } from '@/data/templateDemos';
@@ -27,33 +27,96 @@ const TRUST_STATS = [
   { value: '100%', label: 'Pagamenti Sicuri', icon: Shield },
 ];
 
-// These represent media slots that the admin can replace from the backend
-const HERO_MEDIA = {
-  type: 'image' as const,
-  src: '/images/hero-wedding.jpg',
-  fallbackGradient: 'from-[#fdf2f0] via-white to-[#f4e8d1]',
-};
+interface MediaSlotData {
+  id: string;
+  imageUrl: string;
+  videoUrl: string;
+  overlayColor: string;
+  overlayOpacity: number;
+}
 
-const SHOWCASE_VIDEO = {
-  type: 'video' as const,
-  src: '', // Admin can set YouTube URL or upload video
-  poster: '/images/showcase-poster.jpg',
-};
+function getYouTubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+function getVimeoId(url: string): string | null {
+  const match = url.match(/vimeo\.com\/(\d+)/);
+  return match ? match[1] : null;
+}
 
 export default function HomePage() {
   const featuredTemplates = TEMPLATES.slice(0, 3);
+  const [media, setMedia] = useState<Record<string, MediaSlotData>>({});
+
+  useEffect(() => {
+    async function loadMedia() {
+      try {
+        const res = await fetch('/api/admin/media');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.slots) {
+            const map: Record<string, MediaSlotData> = {};
+            for (const slot of data.slots) {
+              map[slot.id] = slot;
+            }
+            setMedia(map);
+          }
+        }
+      } catch {
+        // Ignore errors - fallback to defaults
+      }
+    }
+    loadMedia();
+  }, []);
+
+  const heroSlot = media['hero-bg'];
+  const showcaseVideoSlot = media['showcase-video'];
+  const showcaseBgSlot = media['showcase-bg'];
+  const gallerySlots = [media['gallery-1'], media['gallery-2'], media['gallery-3'], media['gallery-4']];
+
+  const showcaseYouTubeId = showcaseVideoSlot?.videoUrl ? getYouTubeId(showcaseVideoSlot.videoUrl) : null;
+  const showcaseVimeoId = showcaseVideoSlot?.videoUrl ? getVimeoId(showcaseVideoSlot.videoUrl) : null;
 
   return (
     <div>
       {/* HERO — Strong value proposition */}
       <section className="relative overflow-hidden">
-        {/* Background — replaceable from admin */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${HERO_MEDIA.fallbackGradient}`} />
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
-        </div>
+        {/* Background — loaded from admin URL or fallback gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#fdf2f0] via-white to-[#f4e8d1]" />
+        {heroSlot?.imageUrl && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroSlot.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {heroSlot.overlayOpacity > 0 && (
+              <div
+                className="absolute inset-0 z-[1]"
+                style={{
+                  backgroundColor: heroSlot.overlayColor,
+                  opacity: heroSlot.overlayOpacity / 100,
+                }}
+              />
+            )}
+          </>
+        )}
+        {!heroSlot?.imageUrl && (
+          <div className="absolute inset-0">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
+          </div>
+        )}
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32">
           <div className="text-center max-w-4xl mx-auto">
@@ -202,12 +265,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Media Showcase Section — background image/video replaceable from admin */}
+      {/* Media Showcase Section — background image/video from admin */}
       <section className="relative py-24 overflow-hidden" id="showcase">
-        {/* This is a placeholder for admin-uploadable image/video background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] to-[#16213e]" />
-        {/* Admin can replace this with an uploaded image or YouTube embed */}
-        <div className="absolute inset-0 opacity-20 bg-[url('/images/showcase-bg.jpg')] bg-cover bg-center" />
+        {showcaseBgSlot?.imageUrl && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={showcaseBgSlot.imageUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-20"
+            />
+            {showcaseBgSlot.overlayOpacity > 0 && (
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundColor: showcaseBgSlot.overlayColor,
+                  opacity: showcaseBgSlot.overlayOpacity / 100,
+                }}
+              />
+            )}
+          </>
+        )}
+        {!showcaseBgSlot?.imageUrl && (
+          <div className="absolute inset-0 opacity-20 bg-[url('/images/showcase-bg.jpg')] bg-cover bg-center" />
+        )}
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/10 text-white/80 px-4 py-1.5 rounded-full text-xs font-medium mb-6">
             <Film className="w-3.5 h-3.5" />
@@ -219,15 +301,37 @@ export default function HomePage() {
           <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
             I nostri designer trasformano il vostro amore in un&apos;esperienza digitale unica. Ogni template è pensato per emozionare i vostri ospiti.
           </p>
-          {/* Video placeholder - admin can upload video or paste YouTube link */}
-          <div className="max-w-2xl mx-auto aspect-video bg-black/30 backdrop-blur rounded-2xl border border-white/10 flex items-center justify-center cursor-pointer group">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-              <Play className="w-8 h-8 text-white fill-white" />
-            </div>
+          {/* Video embed or placeholder */}
+          <div className="max-w-2xl mx-auto aspect-video rounded-2xl border border-white/10 overflow-hidden">
+            {showcaseYouTubeId ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${showcaseYouTubeId}`}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Video Showcase"
+              />
+            ) : showcaseVimeoId ? (
+              <iframe
+                src={`https://player.vimeo.com/video/${showcaseVimeoId}`}
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Video Showcase"
+              />
+            ) : (
+              <div className="w-full h-full bg-black/30 backdrop-blur flex items-center justify-center cursor-pointer group">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                  <Play className="w-8 h-8 text-white fill-white" />
+                </div>
+              </div>
+            )}
           </div>
-          <p className="text-xs text-white/40 mt-4">
-            Carica un video o inserisci un link YouTube dal pannello admin per mostrare le tue realizzazioni
-          </p>
+          {!showcaseYouTubeId && !showcaseVimeoId && (
+            <p className="text-xs text-white/40 mt-4">
+              Carica un video o inserisci un link YouTube dal pannello admin per mostrare le tue realizzazioni
+            </p>
+          )}
         </div>
       </section>
 
@@ -308,7 +412,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Image Gallery Section — Admin-replaceable images */}
+      {/* Image Gallery Section — Admin-replaceable images via URL */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -316,22 +420,46 @@ export default function HomePage() {
             <p className="text-sm text-muted-foreground">Immagini sostituibili dal pannello admin</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-[4/3] bg-gradient-to-br from-muted to-secondary rounded-xl overflow-hidden relative group">
-                {/* Placeholder — admin can replace with uploaded images */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <ImageIcon className="w-8 h-8 text-primary/20 mx-auto mb-1" />
-                    <p className="text-[10px] text-muted-foreground">Immagine {i}</p>
-                  </div>
+            {[1, 2, 3, 4].map((i) => {
+              const slot = gallerySlots[i - 1];
+              return (
+                <div key={i} className="aspect-[4/3] bg-gradient-to-br from-muted to-secondary rounded-xl overflow-hidden relative group">
+                  {slot?.imageUrl ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={slot.imageUrl}
+                        alt={`Ispirazione ${i}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      {slot.overlayOpacity > 0 && (
+                        <div
+                          className="absolute inset-0 z-[1]"
+                          style={{
+                            backgroundColor: slot.overlayColor,
+                            opacity: slot.overlayOpacity / 100,
+                          }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <ImageIcon className="w-8 h-8 text-primary/20 mx-auto mb-1" />
+                        <p className="text-[10px] text-muted-foreground">Immagine {i}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-[2]" />
                 </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-              </div>
-            ))}
+              );
+            })}
           </div>
-          <p className="text-center text-xs text-muted-foreground mt-4">
-            Carica le tue immagini dal pannello admin per mostrare matrimoni reali realizzati con i nostri template
-          </p>
+          {!gallerySlots.some(s => s?.imageUrl) && (
+            <p className="text-center text-xs text-muted-foreground mt-4">
+              Carica le tue immagini dal pannello admin per mostrare matrimoni reali realizzati con i nostri template
+            </p>
+          )}
         </div>
       </section>
 
